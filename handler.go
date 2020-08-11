@@ -38,7 +38,9 @@ func (h Handler) HandleTrack(w http.ResponseWriter, r *http.Request, q string) {
 		return
 	}
 
-	json.NewEncoder(w).Encode(struct {
+	e := json.NewEncoder(w)
+	e.SetIndent("", "\t")
+	e.Encode(struct {
 		Data interface{}     `json:"data"`
 		Raw  json.RawMessage `json:"raw"`
 	}{res, res.Body()})
