@@ -1,0 +1,46 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_binary", "go_library")
+
+go_library(
+    name = "go_default_library",
+    srcs = ["main.go"],
+    importpath = "github.com/uhthomas/sfc/cmd/sfc",
+    visibility = ["//visibility:public"],
+    deps = ["//:go_default_library"],
+)
+
+load("@io_bazel_rules_docker//go:image.bzl", "go_image")
+
+go_image(
+    name = "image",
+    srcs = ["main.go"],
+    importpath = "github.com/uhthomas/sfc/cmd/sfc",
+    visibility = ["//visibility:private"],
+    deps = ["//:go_default_library"],
+    goarch = "amd64",
+    goos = "linux",
+    data = ["//:www"],
+)
+
+load("@io_bazel_rules_docker//docker:docker.bzl", "docker_push")
+
+docker_push(
+    name = "push",
+    image = ":image",
+    registry = "docker.pkg.github.com",
+    repository = "uhthomas/sfc/sfc",
+    tag = "{STABLE_GIT_COMMIT}",
+)
+
+docker_push(
+    name = "push_tag",
+    image = ":image",
+    registry = "docker.pkg.github.com",
+    repository = "uhthomas/sfc/sfc",
+    tag = "{STABLE_GIT_REF}",
+)
+
+go_binary(
+    name = "sfc",
+    embed = [":go_default_library"],
+    visibility = ["//visibility:public"],
+)
